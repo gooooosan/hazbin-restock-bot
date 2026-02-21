@@ -3,6 +3,7 @@ import json
 import os
 
 LINE_TOKEN = os.getenv("LINE_TOKEN")
+USER_ID = os.getenv("USER_ID")
 
 PRODUCTS_URL = "https://hazbinhotel.com/products.json"
 
