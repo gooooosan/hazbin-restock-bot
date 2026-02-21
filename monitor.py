@@ -2,7 +2,8 @@ import requests
 import json
 import os
 
-LINE_TOKEN = "LINE_TOKEN"
+import os
+LINE_TOKEN = os.getenv("LINE_TOKEN")
 
 PRODUCTS_URL = "https://hazbinhotel.com/products.json"
 
