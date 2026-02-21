@@ -2,7 +2,7 @@ import requests
 import json
 import os
 
-LINE_TOKEN = "ylDTor6icdfQ8OfZ6hcPNbNKqUQ771RycB5kg64/NYhVj6k1eQGvXybrkGoo2gcUO+xu9zAcoiTmfYERjRIQ1Mk90UjJd/f13kTydD9obJZIEb2UhDO1xmtk255fYh2+5pPpfKg7LuMlOqnoi4KS5AdB04t89/1O/w1cDnyilFU="
+LINE_TOKEN = "LINE TOKEN"
 
 PRODUCTS_URL = "https://hazbinhotel.com/products.json"
 
