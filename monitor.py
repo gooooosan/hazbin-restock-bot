@@ -6,6 +6,7 @@ LINE_TOKEN = os.getenv("LINE_TOKEN")
 USER_ID = os.getenv("USER_ID")
 
 PRODUCTS_URL = "https://hazbinhotel.com/products.json"
+STATE_FILE = "stock_state.json"
 
 def send_line(message):
     headers = {
@@ -24,34 +25,52 @@ def send_line(message):
         data=json.dumps(data)
     )
 
+def load_previous_state():
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_state(state):
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f)
+
 def check_products():
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    headers = {"User-Agent": "Mozilla/5.0"}
+    r = requests.get(PRODUCTS_URL, headers=headers)
+    data = r.json()
 
-    try:
-        r = requests.get(PRODUCTS_URL, headers=headers, timeout=10)
-        r.raise_for_status()
+    products = data.get("products", [])
+    previous_state = load_previous_state()
+    current_state = {}
 
-        data = r.json()
-        products = data.get("products", [])
+    restocked = []
+    new_products = []
 
-        found = []
+    for p in products:
+        title = p["title"]
+        available = any(v["available"] for v in p["variants"])
 
-        for p in products:
-            title = p["title"]
-            for variant in p["variants"]:
-                if variant["available"]:
-                    found.append(title)
+        current_state[title] = available
 
-        if found:
-            message = "🔥 ハズビン再販検知！\n\n" + "\n".join(found)
-            send_line(message)
-        else:
-            print("在庫なし")
+        if title not in previous_state:
+            new_products.append(title)
 
-    except Exception as e:
-        print("エラー:", e)
+        elif previous_state[title] is False and available is True:
+            restocked.append(title)
+
+    messages = []
+
+    if new_products:
+        messages.append("🆕 新商品追加！\n" + "\n".join(new_products))
+
+    if restocked:
+        messages.append("🔥 再販検知！\n" + "\n".join(restocked))
+
+    if messages:
+        send_line("\n\n".join(messages))
+
+    save_state(current_state)
 
 if __name__ == "__main__":
     check_products()
