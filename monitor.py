@@ -5,7 +5,8 @@ import os
 LINE_TOKEN = os.getenv("LINE_TOKEN")
 USER_ID = os.getenv("USER_ID")
 
-PRODUCTS_URL = "https://hazbinhotel.com/products.json"
+BASE_URL = "https://hazbinhotel.com"
+PRODUCTS_URL = f"{BASE_URL}/products.json"
 STATE_FILE = "stock_state.json"
 
 def send_line(message):
@@ -49,23 +50,28 @@ def check_products():
 
     for p in products:
         title = p["title"]
+        handle = p["handle"]
+        url = f"{BASE_URL}/products/{handle}"
+
         available = any(v["available"] for v in p["variants"])
 
         current_state[title] = available
 
+        product_text = f"{title}\n{url}"
+
         if title not in previous_state:
-            new_products.append(title)
+            new_products.append(product_text)
 
         elif previous_state[title] is False and available is True:
-            restocked.append(title)
+            restocked.append(product_text)
 
     messages = []
 
     if new_products:
-        messages.append("🆕 新商品追加！\n" + "\n".join(new_products))
+        messages.append("🆕 新商品追加！\n\n" + "\n\n".join(new_products))
 
     if restocked:
-        messages.append("🔥 再販検知！\n" + "\n".join(restocked))
+        messages.append("🔥 再販検知！\n\n" + "\n\n".join(restocked))
 
     if messages:
         send_line("\n\n".join(messages))
